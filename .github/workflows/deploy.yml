@@ -8,6 +8,7 @@ on:
       - "assets/**"
       - "build.py"
       - "favicon.ico"
+      - ".htaccess"
       - ".github/workflows/deploy.yml"
   workflow_dispatch:
 
@@ -29,8 +30,8 @@ jobs:
       - name: Przygotuj pliki do wysłania
         run: |
           mkdir -p deploy
-          cp index.html favicon.ico deploy/
-          cp -r assets deploy/
+          cp index.html favicon.ico robots.txt sitemap.xml .htaccess deploy/
+          cp -r assets en deploy/
 
       - name: Wyślij na serwer FTP (folder www)
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
@@ -41,3 +42,10 @@ jobs:
           protocol: ftp
           local-dir: ./deploy/
           server-dir: www/
+
+      - name: Sprawdź stronę po wdrożeniu
+        continue-on-error: true
+        run: |
+          for u in https://michalbialek.com/ https://michalbialek.com/en/ https://www.michalbialek.com/ http://michalbialek.com/ https://michalbialek.com/sitemap.xml; do
+            echo "$u -> $(curl -s -o /dev/null -w '%{http_code} %{redirect_url}' --max-time 20 "$u" || echo 'błąd połączenia')"
+          done

@@ -4,7 +4,8 @@ Strona firmowa (PL/EN): oprogramowanie na zamówienie, automatyzacja, integracje
 
 ## Struktura
 - `src/page.html` – źródło strony (treści PL w HTML, tłumaczenia EN w słowniku `EN` w skrypcie).
-- `index.html` – gotowa strona do wgrania na hosting; generowana z `src/page.html`.
+- `index.html`, `en/index.html` – gotowe strony PL i EN (osobne adresy dla Google), generowane z `src/page.html` przez `build.py`.
+- `sitemap.xml`, `robots.txt`, `.htaccess` – SEO, kompresja i cache; też generowane/wgrywane automatycznie.
 - `assets/` – logo i ikony używane przez stronę.
 - `logo/` – wszystkie warianty logo (SVG) i skrypt `generuj_logo.py`.
 

@@ -523,7 +523,7 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;
             <div><dt>5</dt><dd data-i18n="about.f2">firm i zespołów produktowych</dd></div>
             <div><dt>2</dt><dd data-i18n="about.f3">dyplomy z IT</dd></div>
           </dl>
-          <p class="bio" data-i18n="about.bio">Projektuję systemy oparte na zdarzeniach, mikroserwisach i Domain-Driven Design. Zależy mi na czystym kodzie, wydajności i rozwiązaniach, które przynoszą firmie realną wartość. Mieszkam i pracuję we Wrocławiu.</p>
+          <p class="bio" data-i18n="about.bio">Projektuję systemy oparte na zdarzeniach, mikroserwisach i Domain-Driven Design. Zależy mi na czystym kodzie, wydajności i rozwiązaniach, które przynoszą firmie realną wartość. Mieszkam i pracuję we Wrocławiu, a z firmami z całej Polski i z zagranicy współpracuję zdalnie.</p>
           <div class="edu">
             <div><span data-i18n="about.e1y">2018–2020 · mgr</span><b data-i18n="about.e1">Uniwersytet Ekonomiczny we Wrocławiu</b> <span data-i18n="about.e1d">Informatyka w biznesie</span></div>
             <div><span data-i18n="about.e2y">2014–2018 · inż.</span><b data-i18n="about.e2">Politechnika Wrocławska</b> <span data-i18n="about.e2d">Elektronika, informatyka</span></div>
@@ -675,7 +675,7 @@ const EN = {
   "about.label":"/ about","about.title":"Experience from large projects, the approach of a small team.",
   "about.role":"Senior Full Stack Developer · .NET, React",
   "about.f1":"years of experience","about.f2":"companies and product teams","about.f3":"IT degrees",
-  "about.bio":"I design event-driven systems, microservices and Domain-Driven Design solutions. I care about clean code, performance and software that brings real business value. Based in Wrocław, Poland.",
+  "about.bio":"I design event-driven systems, microservices and Domain-Driven Design solutions. I care about clean code, performance and software that brings real business value. Based in Wrocław, Poland, working remotely with companies across Poland and abroad.",
   "about.e1y":"2018–2020 · MSc","about.e1":"Wrocław University of Economics","about.e1d":"IT in Business",
   "about.e2y":"2014–2018 · BEng","about.e2":"Wrocław University of Science and Technology","about.e2d":"Electronics, Information Technology",
   "x1":"A platform for managing headsets, docking stations and video-conferencing cameras: real-time monitoring and configuration at scale. A .NET backend integrated with native C++ libraries, event-driven architecture, WebSockets and a React front end.",
@@ -726,11 +726,10 @@ function setLang(l){
   document.querySelectorAll("[data-i18n-html]").forEach(el=>{el.innerHTML=t(el.dataset.i18nHtml)});
   document.querySelectorAll("[data-i18n-ph]").forEach(el=>{el.placeholder=t(el.dataset.i18nPh)});
   document.querySelectorAll(".lang button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.lang===lang)));
-  if(document.body.dataset.standalone) document.title = t("meta.title");
   try{localStorage.setItem("lang",lang)}catch(e){}
   resetLog();
 }
-document.querySelectorAll(".lang button").forEach(b=>b.addEventListener("click",()=>setLang(b.dataset.lang)));
+document.querySelectorAll(".lang button").forEach(b=>b.addEventListener("click",()=>{ if(document.body.dataset.standalone){ if(b.dataset.lang!==lang) location.href = b.dataset.lang==="en" ? "/en/" : "/"; } else setLang(b.dataset.lang); }));
 
 /* Dziennik zdarzeń w hero (przykładowe dane) */
 const EVENTS = {
@@ -960,7 +959,8 @@ document.getElementById("yr").textContent = new Date().getFullYear();
 
 /* Start: zapamiętany język → ?lang= → język przeglądarki */
 let start = "pl";
-try{
+if(document.body.dataset.standalone){ start = document.documentElement.lang==="en" ? "en" : "pl"; }
+else try{
   const q = new URLSearchParams(location.search).get("lang");
   const saved = localStorage.getItem("lang");
   start = q || saved || ((navigator.language||"pl").toLowerCase().startsWith("pl") ? "pl" : "en");
