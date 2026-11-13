@@ -1,5 +1,5 @@
 # Składa samodzielny index.html z src/page.html (do hostingu, np. Netlify / Cloudflare Pages / GitHub Pages)
-import re, pathlib
+import re, pathlib, os
 src = pathlib.Path(__file__).with_name("src").joinpath("page.html").read_text(encoding="utf-8")
 body = re.sub(r'^<title>.*?</title>\n<meta name="claude:viewport-fit-sides"[^>]*>\n', '', src, flags=re.S)
 head = '''<!doctype html>
@@ -22,5 +22,8 @@ head = '''<!doctype html>
 </head>
 <body data-standalone="1">
 '''
+key = os.environ.get("WEB3FORMS_KEY", "").strip()
+if key:
+    body = body.replace('const WEB3FORMS_KEY = "";', 'const WEB3FORMS_KEY = "%s";' % key)
 pathlib.Path(__file__).with_name("index.html").write_text(head + body + "\n</body>\n</html>\n", encoding="utf-8")
 print("ok")

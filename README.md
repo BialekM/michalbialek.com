@@ -18,6 +18,7 @@ Workflow: `.github/workflows/deploy.yml`. Wymaga trzech sekretów w **Settings �
 - `FTP_SERVER` – adres serwera FTP z panelu OVH (zakładka FTP-SSH), np. `ftp.clusterXXX.hosting.ovh.net`
 - `FTP_USERNAME` – login FTP
 - `FTP_PASSWORD` – hasło FTP
+- `WEB3FORMS_KEY` – klucz formularza kontaktowego z https://web3forms.com (wstawiany do strony przy budowaniu)
 
 Ręczne uruchomienie: zakładka **Actions → Wdrożenie na OVH → Run workflow**.
 
