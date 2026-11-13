@@ -1,0 +1,40 @@
+name: Wdrożenie na OVH
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/**"
+      - "assets/**"
+      - "build.py"
+      - ".github/workflows/deploy.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-ovh
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Zbuduj index.html ze źródła
+        run: python3 build.py
+
+      - name: Przygotuj pliki do wysłania
+        run: |
+          mkdir -p deploy
+          cp index.html deploy/
+          cp -r assets deploy/
+
+      - name: Wyślij na serwer FTP (folder www)
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftp
+          local-dir: ./deploy/
+          server-dir: www/
