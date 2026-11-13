@@ -788,67 +788,104 @@ if(!REDUCED && matchMedia("(pointer:fine)").matches) document.querySelectorAll("
   b.addEventListener("pointerleave",()=>{b.style.transform=""});
 });
 
-/* Interaktywne tło: siatka punktów (jak papier techniczny), po której jeżdżą "zlecenia"
-   skręcające pod kątem prostym. Kursor działa jak soczewka, kliknięcie wysyła falę i rozgałęzia zlecenia. */
+/* Tło: przygaszony kod (z numerami linii) jak w edytorze. Pod kursorem delikatnie wraca podświetlanie składni,
+   a co kilka sekund jedna linia "pisze się" na nowo. Bez kliknięć i fajerwerków, żeby nie przeszkadzało w czytaniu. */
 (function(){
   const cv=document.getElementById("bg"),ctx=cv.getContext("2d");
-  const S=26; let W,H,dpr,cols,rows,heat,agents=[],ripples=[],mouse={x:-9999,y:-9999},col={},last=0;
-  const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
-  function colors(){col.ink=css("--ink");col.acc=css("--accent");col.hi=css("--accent-hi")}
-  function size(){dpr=Math.min(2,devicePixelRatio||1);W=innerWidth;H=innerHeight;cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);
-    cols=Math.ceil(W/S)+1;rows=Math.ceil(H/S)+1;heat=new Float32Array(cols*rows)}
-  const DIRS=[[1,0],[0,1],[-1,0],[0,-1]];
-  function spawn(gx,gy,d){
-    if(gx===undefined){const e=Math.floor(Math.random()*4);
-      if(e===0){gx=0;gy=Math.floor(Math.random()*rows);d=0}else if(e===1){gx=Math.floor(Math.random()*cols);gy=0;d=1}
-      else if(e===2){gx=cols-1;gy=Math.floor(Math.random()*rows);d=2}else{gx=Math.floor(Math.random()*cols);gy=rows-1;d=3}}
-    agents.push({gx,gy,d,t:0,trail:[[gx,gy]],speed:.07+Math.random()*.05,life:220+Math.random()*260});
-  }
-  function heatAt(gx,gy,v){if(gx>=0&&gy>=0&&gx<cols&&gy<rows){const i=gy*cols+gx;heat[i]=Math.min(1,heat[i]+v)}}
-  function step(){
-    if(agents.length<7&&Math.random()<.03) spawn();
-    for(let k=agents.length-1;k>=0;k--){const a=agents[k];a.t+=a.speed;a.life--;
-      if(a.t>=1){a.t=0;a.gx+=DIRS[a.d][0];a.gy+=DIRS[a.d][1];a.trail.push([a.gx,a.gy]);if(a.trail.length>16)a.trail.shift();heatAt(a.gx,a.gy,.9);
-        if(Math.random()<.22)a.d=(a.d+(Math.random()<.5?1:3))%4;
-        if(a.gx<-1||a.gy<-1||a.gx>cols||a.gy>rows||a.life<0){agents.splice(k,1)}}}
-    for(let i=0;i<heat.length;i++)heat[i]*=.955;
-    for(let k=ripples.length-1;k>=0;k--){const r=ripples[k];r.r+=7;if(r.r>r.max)ripples.splice(k,1)}
-  }
-  function draw(){
-    ctx.clearRect(0,0,W,H);
-    const R=170;
-    for(let gy=0;gy<rows;gy++)for(let gx=0;gx<cols;gx++){
-      let x=gx*S,y=gy*S;const dx=x-mouse.x,dy=y-mouse.y,d=Math.hypot(dx,dy);let lens=0;
-      if(d<R){lens=Math.pow(1-d/R,2);const push=lens*16/(d||1);x+=dx*push;y+=dy*push}
-      let rip=0;for(const r of ripples){const dd=Math.abs(Math.hypot(gx*S-r.x,gy*S-r.y)-r.r);if(dd<22)rip=Math.max(rip,(1-dd/22)*(1-r.r/r.max))}
-      const h=Math.max(heat[gy*cols+gx],rip);const e=Math.max(lens,h);
-      const s=1.3+e*2.6;
-      ctx.globalAlpha=.16+e*.8;ctx.fillStyle=e>.08?col.acc:col.ink;
-      ctx.fillRect(x-s/2,y-s/2,s,s);
+  const CODE=`// less clicking, more doing
+public sealed class OrderAutomation : IHandle<OrderCreated>
+{
+    public async Task HandleAsync(OrderCreated e, CancellationToken ct)
+    {
+        var invoice = await _invoices.IssueAsync(e.OrderId, ct);
+        await _stock.ReserveAsync(e.Items, ct);
+        await _mailer.SendAsync(e.Customer, Templates.OrderConfirmed, ct);
+        _log.LogInformation("Order {Id} processed in {Ms} ms", e.OrderId, sw.ElapsedMilliseconds);
     }
-    ctx.lineCap="square";
-    for(const a of agents){const tr=a.trail,hx=(a.gx+DIRS[a.d][0]*a.t)*S,hy=(a.gy+DIRS[a.d][1]*a.t)*S;
-      for(let i=1;i<tr.length;i++){ctx.globalAlpha=(i/tr.length)*.55;ctx.strokeStyle=col.acc;ctx.lineWidth=1.6;
-        ctx.beginPath();ctx.moveTo(tr[i-1][0]*S,tr[i-1][1]*S);ctx.lineTo(tr[i][0]*S,tr[i][1]*S);ctx.stroke()}
-      const lx=tr[tr.length-1][0]*S,ly=tr[tr.length-1][1]*S;ctx.globalAlpha=.6;ctx.beginPath();ctx.moveTo(lx,ly);ctx.lineTo(hx,hy);ctx.stroke();
-      ctx.globalAlpha=1;ctx.fillStyle=col.hi;ctx.shadowColor=col.acc;ctx.shadowBlur=14;ctx.fillRect(hx-3,hy-3,6,6);ctx.shadowBlur=0}
-    for(const r of ripples){ctx.globalAlpha=.35*(1-r.r/r.max);ctx.strokeStyle=col.acc;ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(r.x,r.y,r.r,0,7);ctx.stroke()}
-    ctx.globalAlpha=1;
+}
+builder.Services.AddHostedService<InvoiceWorker>();
+app.MapPost("/api/leads", async (Lead lead, ILeadService s) => await s.CreateAsync(lead));
+if (manual) { automate(); }
+export async function syncCrm(since: Date): Promise<number> {
+  const changed = await erp.customers.where(c => c.updatedAt > since);
+  for (const c of changed) await crm.upsert(mapCustomer(c));
+  return changed.length;
+}
+schedule("0 6 * * MON-FRI", () => reports.send("daily-sales", ["board@company.com"]));
+SELECT c.Name, SUM(o.Total) AS Revenue FROM Orders o JOIN Customers c ON c.Id = o.CustomerId GROUP BY c.Name;
+var slow = db.Orders.Include(o => o.Lines).AsNoTracking().Where(o => o.Status == Status.Open);
+const socket = new WebSocket("wss://devices.local/stream");
+socket.onmessage = (msg) => dashboard.update(JSON.parse(msg.data));
+// TODO: invoices issue themselves ✓
+while (ideas.Any()) { Build(ideas.Dequeue()); }
+await using var tx = await db.Database.BeginTransactionAsync(ct);
+return Results.Ok(new { status = "automated", savedHours = 12 });`.split("\n");
+  const KW=new Set("public private sealed class async await var new return if for while const let export function await using of in from select where join on group by as interface type static void true false null".split(" ").concat("SELECT FROM JOIN ON GROUP BY AS SUM WHERE".split(" ")));
+  function tokens(line){const out=[];const re=/(\/\/.*$)|("(?:[^"\\]|\\.)*")|(\b\d+\b)|([A-Za-z_][\w]*)(?=\s*\()|([A-Z][\w]*)|([A-Za-z_][\w]*)|(\s+)|(.)/g;let m;
+    while((m=re.exec(line))){const [s]=m;let k="p";
+      if(m[1])k="cm";else if(m[2])k="str";else if(m[3])k="num";else if(m[4])k=KW.has(s)?"kw":"fn";else if(m[5])k=KW.has(s)?"kw":"type";else if(m[6])k=KW.has(s)?"kw":"var";else if(m[7])k="ws";
+      out.push([s,k])}return out}
+  const TOK=CODE.map(tokens);
+  const PAL={dark:{p:"#C9D1E0",kw:"#C586C0",fn:"#DCDCAA",type:"#4EC9B0",var:"#9CDCFE",str:"#CE9178",num:"#B5CEA8",cm:"#6A9955"},
+             light:{p:"#3B4252",kw:"#A626A4",fn:"#795E26",type:"#267F99",var:"#1F5FBF",str:"#A31515",num:"#098658",cm:"#5A8A4A"}};
+  const FS=13,LH=21,PADX=24,GUT=38;let W,H,dpr,base,bright,tmp,mode="dark",mouse={x:-9999,y:-9999},sm={x:-9999,y:-9999},typing=null,blocks=[];
+  const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  function isDark(){const c=css("--bg");const m=c.match(/[0-9a-f]{2}/gi);if(!m)return true;const [r,g,b]=m.slice(0,3).map(h=>parseInt(h,16));return (r*.3+g*.59+b*.11)<128}
+  function mk(){const c=document.createElement("canvas");c.width=W*dpr;c.height=H*dpr;const x=c.getContext("2d");x.setTransform(dpr,0,0,dpr,0,0);x.font=`${FS}px "JetBrains Mono", ui-monospace, monospace`;x.textBaseline="middle";return [c,x]}
+  function layout(){ // kolumny kodu z różnym przesunięciem wierszy
+    blocks=[];const colW=Math.max(520,Math.min(760,W/2));let bx=PADX,bi=0;
+    while(bx<W){blocks.push({x:bx+GUT,off:(bi*11)%CODE.length,w:colW});bx+=colW+40;bi++}
   }
-  function frame(t){ if(t-last>=15){step();last=t} draw(); if(!REDUCED&&!document.hidden) requestAnimationFrame(frame) }
-  colors();size();
-  if(!REDUCED){for(let i=0;i<4;i++)spawn()}
-  addEventListener("resize",()=>{size();if(REDUCED)draw()});
-  addEventListener("pointermove",e=>{mouse.x=e.clientX;mouse.y=e.clientY},{passive:true});
+  function render(){
+    mode=isDark()?"dark":"light";const P=PAL[mode];
+    let bx,b;[base,bx]=mk();[bright,b]=mk();[tmp]=mk();
+    const rows=Math.ceil(H/LH)+1;
+    for(const blk of blocks)for(let r=0;r<rows;r++){const li=(r+blk.off)%CODE.length,y=r*LH+LH/2+6;let x=blk.x;
+      bx.fillStyle=P.p;bx.globalAlpha=mode==="dark"?.035:.05;bx.textAlign="right";bx.fillText(String(li+1),blk.x-12,y);bx.textAlign="left";
+      for(const [s,k] of TOK[li]){const w=bx.measureText(s).width;if(x-blk.x+w>blk.w)break;
+        if(k!=="ws"){bx.fillStyle=P.p;bx.globalAlpha=mode==="dark"?.06:.055;bx.fillText(s,x,y);b.fillStyle=P[k]||P.p;b.globalAlpha=1;b.fillText(s,x,y)}x+=w}}
+  }
+  function size(){dpr=Math.min(2,devicePixelRatio||1);W=innerWidth;H=innerHeight;cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(1,0,0,1,0,0);layout();render()}
+  function reveal(){ // jasna warstwa tylko w okręgu pod kursorem
+    const t=tmp.getContext("2d");t.setTransform(1,0,0,1,0,0);t.globalCompositeOperation="source-over";t.clearRect(0,0,tmp.width,tmp.height);
+    t.drawImage(bright,0,0);t.globalCompositeOperation="destination-in";
+    const g=t.createRadialGradient(sm.x*dpr,sm.y*dpr,0,sm.x*dpr,sm.y*dpr,170*dpr);g.addColorStop(0,"rgba(0,0,0,.6)");g.addColorStop(.6,"rgba(0,0,0,.25)");g.addColorStop(1,"rgba(0,0,0,0)");
+    t.fillStyle=g;t.fillRect(0,0,tmp.width,tmp.height);t.globalCompositeOperation="source-over";
+  }
+  function frame(now){
+    sm.x+= (mouse.x-sm.x)*.18; sm.y+=(mouse.y-sm.y)*.18; if(mouse.x<-999){sm.x=sm.y=-9999}
+    ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,cv.width,cv.height);ctx.drawImage(base,0,0);
+    // latarka
+    if(sm.x>-999){reveal();ctx.globalAlpha=mode==="dark"?.55:.5;ctx.drawImage(tmp,0,0);ctx.globalAlpha=1}
+    ctx.globalAlpha=1;
+    // linia, która pisze się na nowo
+    if(!typing||typing.done&&now-typing.end>2600){
+      const blk=blocks[Math.floor(Math.random()*blocks.length)],r=Math.floor(Math.random()*(H/LH-2))+1;
+      typing={blk,r,li:(r+blk.off)%CODE.length,n:0,start:now,done:false};
+    }
+    if(typing){const P=PAL[mode],y=typing.r*LH+LH/2+6,full=CODE[typing.li];
+      if(!typing.done){typing.n=Math.min(full.length,Math.floor((now-typing.start)/55));if(typing.n>=full.length){typing.done=true;typing.end=now}}
+      ctx.setTransform(dpr,0,0,dpr,0,0);ctx.font=`${FS}px "JetBrains Mono", ui-monospace, monospace`;ctx.textBaseline="middle";
+      const fade=typing.done?Math.max(0,1-(now-typing.end)/900):1;
+      ctx.fillStyle=css("--bg");ctx.globalAlpha=.9*fade;const tw=ctx.measureText(full).width;ctx.fillRect(typing.blk.x-4,y-LH/2,Math.min(tw,typing.blk.w)+12,LH);
+      let x=typing.blk.x,c=0;ctx.globalAlpha=(mode==="dark"?.32:.38)*fade;
+      for(const [s,k] of TOK[typing.li]){if(c>=typing.n)break;const part=s.slice(0,typing.n-c);c+=s.length;if(x-typing.blk.x>typing.blk.w)break;
+        if(k!=="ws"){ctx.fillStyle=P[k]||P.p;ctx.fillText(part,x,y)}x+=ctx.measureText(part).width}
+      if(!typing.done||Math.floor(now/500)%2===0){ctx.globalAlpha=.55*fade;ctx.fillStyle=css("--accent");ctx.fillRect(x+1,y-8,2,16)}
+      ctx.globalAlpha=1;ctx.setTransform(1,0,0,1,0,0)}
+    if(!REDUCED&&!document.hidden) requestAnimationFrame(frame);
+  }
+  function still(){ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,cv.width,cv.height);ctx.drawImage(base,0,0)}
+  size();
+  addEventListener("resize",()=>{size();if(REDUCED)still()});
+  addEventListener("pointermove",e=>{mouse.x=e.clientX;mouse.y=e.clientY;if(sm.x<-999){sm.x=e.clientX;sm.y=e.clientY}},{passive:true});
   document.addEventListener("pointerleave",()=>{mouse.x=mouse.y=-9999});
-  addEventListener("pointerdown",e=>{ if(REDUCED||e.target.closest("input,textarea,select,label"))return;
-    ripples.push({x:e.clientX,y:e.clientY,r:0,max:Math.max(W,H)*.6});
-    const gx=Math.round(e.clientX/S),gy=Math.round(e.clientY/S); for(let d=0;d<4;d++) if(agents.length<14) spawn(gx,gy,d);
-  });
   document.addEventListener("visibilitychange",()=>{if(!document.hidden&&!REDUCED)requestAnimationFrame(frame)});
-  matchMedia("(prefers-color-scheme: dark)").addEventListener("change",()=>{colors();if(REDUCED)draw()});
-  new MutationObserver(()=>{colors();if(REDUCED)draw()}).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
-  if(REDUCED) draw(); else requestAnimationFrame(frame);
+  const re=()=>{render();if(REDUCED)still()};
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change",re);
+  new MutationObserver(re).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
+  if(document.fonts&&document.fonts.load) document.fonts.load(`${FS}px "JetBrains Mono"`).then(re).catch(()=>{});
+  if(REDUCED) still(); else requestAnimationFrame(frame);
 })();
 
 /* ===== Fajerwerki ===== */
