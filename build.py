@@ -5,6 +5,7 @@
 # Teksty EN pochodzą ze słownika `const EN = {...}` w src/page.html, więc obie wersje są
 # gotowym HTML-em (Google indeksuje je bez uruchamiania JavaScriptu).
 import re, json, pathlib, os, datetime, html
+import legal
 
 ROOT = pathlib.Path(__file__).parent
 SITE = "https://michalbialek.com"
@@ -15,6 +16,11 @@ body = re.sub(r'^<title>.*?</title>\n<meta name="claude:viewport-fit-sides"[^>]*
 key = os.environ.get("WEB3FORMS_KEY", "").strip()
 if key:
     body = body.replace('const WEB3FORMS_KEY = "";', 'const WEB3FORMS_KEY = "%s";' % key)
+
+# Czcionki z własnego serwera zamiast Google Fonts (RODO: brak przekazywania IP do Google)
+body = re.sub(r'<link rel="preconnect" href="https://fonts\.g[^>]*>\n', '', body)
+body, n = re.subn(r'<link rel="stylesheet" href="https://fonts\.googleapis\.com/[^"]*">', '<link rel="stylesheet" href="/assets/fonts/fonts.css">', body)
+assert n == 1, "nie znaleziono linku Google Fonts"
 
 # Ścieżki bezwzględne, żeby działały też pod /en/
 body = body.replace('src="assets/', 'src="/assets/').replace('href="assets/', 'href="/assets/')
@@ -123,10 +129,22 @@ def head(lang):
 (ROOT / "en").mkdir(exist_ok=True)
 (ROOT / "en" / "index.html").write_text(head("en") + translate(body, EN) + "\n</body>\n</html>\n", encoding="utf-8")
 
+legal_pages = legal.build(ROOT)
+
 today = datetime.date.today().isoformat()
 alts = f'''    <xhtml:link rel="alternate" hreflang="pl" href="{SITE}/"/>
     <xhtml:link rel="alternate" hreflang="en" href="{SITE}/en/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="{SITE}/"/>'''
+def _legal_url(path, lang, alt):
+    pl, en = (path, alt) if lang == "pl" else (alt, path)
+    return f'''  <url>
+    <loc>{SITE}/{path}</loc>
+    <lastmod>{today}</lastmod>
+    <xhtml:link rel="alternate" hreflang="pl" href="{SITE}/{pl}"/>
+    <xhtml:link rel="alternate" hreflang="en" href="{SITE}/{en}"/>
+  </url>
+'''
+legal_urls = "".join(_legal_url(*x) for x in legal_pages)
 (ROOT / "sitemap.xml").write_text(f'''<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
@@ -139,7 +157,7 @@ alts = f'''    <xhtml:link rel="alternate" hreflang="pl" href="{SITE}/"/>
     <lastmod>{today}</lastmod>
 {alts}
   </url>
-</urlset>
+{legal_urls}</urlset>
 ''', encoding="utf-8")
 (ROOT / "robots.txt").write_text(f"User-agent: *\nAllow: /\n\nSitemap: {SITE}/sitemap.xml\n", encoding="utf-8")
 print("ok")

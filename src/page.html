@@ -306,6 +306,16 @@ textarea{min-height:140px;resize:vertical}
 .chips input:checked + label{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .chips input:focus-visible + label{outline:2px solid var(--accent);outline-offset:2px}
 .consent{display:flex;flex-direction:row;gap:10px;align-items:flex-start;font-size:.85rem;color:var(--muted);font-weight:400}
+.consent a,.gdpr a,.flinks a{color:inherit;text-decoration:underline;text-underline-offset:2px}
+.consent .req{color:var(--accent)}
+.gdpr{grid-column:1/-1;margin:-4px 0 0;font-size:.76rem;line-height:1.5;color:var(--muted)}
+.flinks a{text-decoration-color:color-mix(in srgb,currentColor 40%,transparent)}
+.flinks a:hover{color:var(--ink)}
+.map-load{position:absolute;left:50%;top:150px;transform:translateX(-50%);z-index:3;display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;width:max-content;max-width:90%}
+.map-load button{font:inherit;font-weight:600;font-size:.85rem;padding:7px 14px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.map-load button:hover{border-color:var(--accent);color:var(--accent)}
+.map-load small{font-size:.72rem;color:var(--muted);background:var(--surface);padding:2px 8px;border-radius:6px}
+.map:has(iframe) .map-load{display:none}
 .consent input{width:18px;height:18px;flex:none;margin-top:2px;accent-color:var(--accent)}
 .form-foot{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:16px;justify-content:space-between}
 .status{font-size:.92rem;color:var(--muted);flex:1 1 240px}
@@ -562,6 +572,7 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;
           <div class="row"><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" style="fill:currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg></span><div class="rtxt"><span class="mono">linkedin</span><a id="c-linkedin" href="#" target="_blank" rel="noopener">Michał Białek</a></div></div>
           <div class="row"><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" style="fill:currentColor"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg></span><div class="rtxt"><span class="mono">github</span><a id="c-github" href="#" target="_blank" rel="noopener">GitHub</a></div></div>
           <div class="map" id="map">
+            <div class="map-load" id="map-load" hidden><button type="button" id="map-btn" data-i18n="c.mapload">Pokaż mapę Google</button><small data-i18n="c.mapnote">Mapa wczyta się z serwerów Google dopiero po kliknięciu.</small></div>
             <div class="map-fallback" aria-hidden="true">
               <svg viewBox="0 0 400 220" preserveAspectRatio="xMidYMid slice"><g fill="none" stroke="currentColor" stroke-width="1.2" opacity=".35"><path d="M-10 60 C80 40 140 90 220 70 S340 30 410 50"/><path d="M-10 150 C60 130 150 170 240 140 S350 120 410 140"/><path d="M60 -10 C70 60 50 140 80 230"/><path d="M180 -10 C200 80 170 150 190 230"/><path d="M300 -10 C290 70 320 150 300 230"/></g><g fill="none" stroke="currentColor" stroke-width="5" opacity=".18"><path d="M-10 110 C100 95 220 125 410 100"/></g></svg>
               <span class="pin"><svg viewBox="0 0 24 24" width="34" height="34"><path d="M12 22s7-6.3 7-12a7 7 0 1 0-14 0c0 5.7 7 12 7 12z" fill="currentColor"/><circle cx="12" cy="10" r="2.6" fill="#fff"/></svg></span>
@@ -592,7 +603,8 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;
           </div>
           <div class="f full"><label for="f-msg" data-i18n="f.msg">Opisz krótko problem lub pomysł</label><textarea id="f-msg" name="message" required data-i18n-ph="f.msgph" placeholder="Np. faktury przepisujemy ręcznie z systemu zamówień do księgowości, zajmuje to 2 osobom pół dnia tygodniowo."></textarea></div>
           <input class="hp" id="f-hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
-          <label class="consent f full" for="f-consent"><input type="checkbox" id="f-consent" name="consent" required><span data-i18n="f.consent">Zgadzam się na przetwarzanie moich danych w celu odpowiedzi na zapytanie.</span></label>
+          <label class="consent f full" for="f-consent"><input type="checkbox" id="f-consent" name="consent" required><span data-i18n-html="f.consent">Zapoznałem(-am) się z <a href="/polityka-prywatnosci/">polityką prywatności</a> i zgadzam się na przetwarzanie podanych danych w celu odpowiedzi na moje zapytanie. <b class="req">*</b></span></label>
+          <p class="gdpr full" data-i18n-html="f.gdpr">Administratorem danych jest Michał Białek, ul. Krzycka 86E, 53-020 Wrocław. Dane z formularza wykorzystuję wyłącznie do odpowiedzi na zapytanie i ewentualnej dalszej rozmowy. Możesz w każdej chwili poprosić o ich wgląd, poprawienie lub usunięcie. Szczegóły: <a href="/polityka-prywatnosci/">polityka prywatności</a>.</p>
           <div class="form-foot">
             <p class="status" id="f-status" role="status" aria-live="polite"></p>
             <button class="btn btn-primary" type="submit"><span data-i18n="f.send">Wyślij zapytanie</span><span class="arr">→</span></button>
@@ -606,6 +618,7 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;
 <footer>
   <div class="wrap">
     <span>© <span id="yr">2026</span> Michał Białek · <span data-i18n="foot.l">Oprogramowanie dla firm</span></span>
+    <span class="flinks" data-i18n-html="foot.links"><a href="/polityka-prywatnosci/">Polityka prywatności</a> · <a href="/regulamin/">Regulamin</a></span>
     <span class="mono">Wrocław, PL</span>
   </div>
 </footer>
@@ -638,9 +651,12 @@ const WEB3FORMS_KEY = "";
   const q=encodeURIComponent(CONTACT.mapQuery||CONTACT.address);
   document.getElementById("c-address").textContent=CONTACT.address;
   document.getElementById("c-maplink").href="https://www.google.com/maps/dir/?api=1&destination="+q;
-  if(document.body.dataset.standalone){ /* na prawdziwej stronie: mapa Google */
+  if(document.body.dataset.standalone){ /* na prawdziwej stronie: mapa Google dopiero po kliknięciu (RODO) */
+    document.getElementById("map-load").hidden=false;
+    document.getElementById("map-btn").addEventListener("click",()=>{
     const f=document.createElement("iframe"); f.src="https://www.google.com/maps?q="+q+"&output=embed"; f.loading="lazy";
     f.referrerPolicy="no-referrer-when-downgrade"; f.title="Mapa: "+CONTACT.address; document.getElementById("map").prepend(f);
+    });
   }
 })();
 
@@ -692,7 +708,10 @@ const EN = {
   "f.t1":"New application","f.t2":"Automation","f.t3":"Optimisation","f.t4":"Modernisation","f.t5":"Something else",
   "f.msg":"Briefly describe the problem or idea",
   "f.msgph":"E.g. we retype invoices by hand from the order system into accounting; it takes two people half a day every week.",
-  "f.consent":"I agree to the processing of my data in order to reply to this enquiry.",
+  "f.consent":"I have read the <a href=\"/en/privacy-policy/\">privacy policy</a> and agree to the processing of the data I provide in order to reply to my enquiry. <b class=\"req\">*</b>",
+  "f.gdpr":"The data controller is Michał Białek, ul. Krzycka 86E, 53-020 Wrocław, Poland. I use the data from this form only to reply to your enquiry and any follow-up conversation. You can ask to access, correct or delete it at any time. Details: <a href=\"/en/privacy-policy/\">privacy policy</a>.",
+  "foot.links":"<a href=\"/en/privacy-policy/\">Privacy policy</a> · <a href=\"/en/terms/\">Terms</a>",
+  "c.mapload":"Show Google map","c.mapnote":"The map loads from Google only after you click.",
   "f.send":"Send enquiry","foot.l":"Software for businesses",
   "copied":"copied","err.req":"Please fill in your name, e-mail, a short description and the consent box.",
   "err.email":"That e-mail address looks incomplete.","sending":"Sending…",
